@@ -1,0 +1,25 @@
+{
+  "name": "fintrack",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/K2-V/Fin-Track#readme",
+  "bugs": {
+    "url": "https://github.com/K2-V/Fin-Track/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/K2-V/Fin-Track.git"
+  },
+  "license": "ISC",
+  "author": "Viktor",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongoose": "^8.15.0"
+  }
+}
