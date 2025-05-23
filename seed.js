@@ -22,8 +22,8 @@ async function seed() {
     const appleStock = await Investment.create({
         assetName: 'Apple',
         categoryId: categories.find(c => c.name === 'Stocks')._id,
-        quantity: 10,
-        purchasePrice: 145,
+        amount: 10,
+        initialPrice: 145,
         purchaseDate: new Date('2024-01-15'),
         note: 'Dlouhodobá investice'
     });
@@ -31,17 +31,17 @@ async function seed() {
     const bitcoin = await Investment.create({
         assetName: 'Bitcoin',
         categoryId: categories.find(c => c.name === 'Crypto')._id,
-        quantity: 0.5,
-        purchasePrice: 28000,
+        amount: 0.5,
+        initialPrice: 28000,
         purchaseDate: new Date('2024-03-10')
     });
 
     const bond = await Investment.create({
         assetName: 'Státní dluhopis 2030',
         categoryId: categories.find(c => c.name === 'Bonds')._id,
-        quantity: 10000, // investovaná částka
-        purchasePrice: 1, // může být 1:1
-        purchaseDate: new Date('2024-05-01'),
+        amount: 10000, // investovaná částka
+        initialPrice: 1, // může být 1:1
+        purchaseDate: new Date('2022-05-01'),
         couponRate: 3.5,
         investmentLength: 72, // měsíců
         note: 'Bezpečná investice'

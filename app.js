@@ -21,7 +21,7 @@ app.use('/api/categories', categoryRoutes );
 const updatePrices = require('./priceUpdater');
 
 setInterval(() => {
-    console.log(`Spouštím updatePrices() v ${new Date().toLocaleTimeString()}`);
+    // console.log(`Spouštím updatePrices() v ${new Date().toLocaleTimeString()}`);
     updatePrices();
 }, 1000 * 20);
 
