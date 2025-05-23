@@ -14,12 +14,13 @@
   "license": "ISC",
   "author": "Viktor",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "express": "^5.1.0",
+    "express-validator": "^7.2.1",
     "mongoose": "^8.15.0"
   }
 }
