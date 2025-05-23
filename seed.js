@@ -13,15 +13,15 @@ async function seed() {
     await MarketPrice.deleteMany({});
 
     const categories = await Category.insertMany([
-        { name: 'Akcie' },
-        { name: 'Kryptoměny' },
-        { name: 'Dluhopisy' }
+        { name: 'Stocks' },
+        { name: 'Crypto' },
+        { name: 'Bonds' }
     ]);
     console.log('📦 Categories seeded');
 
     const appleStock = await Investment.create({
         assetName: 'Apple',
-        categoryId: categories.find(c => c.name === 'Akcie')._id,
+        categoryId: categories.find(c => c.name === 'Stocks')._id,
         quantity: 10,
         purchasePrice: 145,
         purchaseDate: new Date('2024-01-15'),
@@ -30,7 +30,7 @@ async function seed() {
 
     const bitcoin = await Investment.create({
         assetName: 'Bitcoin',
-        categoryId: categories.find(c => c.name === 'Kryptoměny')._id,
+        categoryId: categories.find(c => c.name === 'Crypto')._id,
         quantity: 0.5,
         purchasePrice: 28000,
         purchaseDate: new Date('2024-03-10')
@@ -38,7 +38,7 @@ async function seed() {
 
     const bond = await Investment.create({
         assetName: 'Státní dluhopis 2030',
-        categoryId: categories.find(c => c.name === 'Dluhopisy')._id,
+        categoryId: categories.find(c => c.name === 'Bonds')._id,
         quantity: 10000, // investovaná částka
         purchasePrice: 1, // může být 1:1
         purchaseDate: new Date('2024-05-01'),
@@ -47,20 +47,20 @@ async function seed() {
         note: 'Bezpečná investice'
     });
 
-    await MarketPrice.insertMany([
-        { assetName: 'Apple', date: new Date(), price: 170 },
-        { assetName: 'Bitcoin', date: new Date(), price: 39000 },
-        { assetName: 'Státní dluhopis 2030', date: new Date(), price: 1.03 }
-    ]);
-
-    console.log('💰 Investments and prices seeded');
+    // await MarketPrice.insertMany([
+    //     { assetName: 'Apple', date: new Date(), price: 170 },
+    //     { assetName: 'Bitcoin', date: new Date(), price: 39000 },
+    //     { assetName: 'Státní dluhopis 2030', date: new Date(), price: 1.03 }
+    // ]);
+    //
+    // console.log('💰 Investments and prices seeded');
 
     const allInvestments = await Investment.find().populate('categoryId');
-    console.log('📄 All seeded investments:');
-    console.log(JSON.stringify(allInvestments, null, 2));
+    // // console.log('📄 All seeded investments:');
+    // console.log(JSON.stringify(allInvestments, null, 2));
 
-    // await mongoose.disconnect();
-    // console.log('🔴 Disconnected from MongoDB');
+    await mongoose.disconnect();
+    console.log('🔴 Disconnected from MongoDB');
 
 }
 

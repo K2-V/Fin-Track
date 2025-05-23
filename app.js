@@ -18,6 +18,12 @@ app.use('/api/investments', investmentRoutes);
 app.use('/api/categories', categoryRoutes );
 
 
+const updatePrices = require('./priceUpdater');
+
+setInterval(() => {
+    console.log(`Spouštím updatePrices() v ${new Date().toLocaleTimeString()}`);
+    updatePrices();
+}, 1000 * 20);
 
 app.get('/', (req, res) => {
     res.send('Hello World!')

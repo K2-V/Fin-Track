@@ -8,4 +8,4 @@ const MarketPriceSchema = new mongoose.Schema({
 
 MarketPriceSchema.index({ assetName: 1, date: -1 }); // rychlé vyhledání poslední ceny
 
-module.exports = mongoose.model('MarketPrice', MarketPriceSchema);
+module.exports = mongoose.models.MarketPrice || mongoose.model('MarketPrice', MarketPriceSchema);

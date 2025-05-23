@@ -12,4 +12,4 @@ const InvestmentSchema = new mongoose.Schema({
     investmentLength: {type: Number, /* v měsících*/ }
 });
 
-module.exports = mongoose.model('Investment', InvestmentSchema);
+module.exports = mongoose.models.Investment || mongoose.model('Investment', InvestmentSchema);
