@@ -4,7 +4,6 @@ const MarketPrice = require('./models/marketPrice');
 const Investment = require('./models/investment');
 const fs = require('fs');
 const path = require('path');
-const Category = require('./models/category');
 
 const allStocks = JSON.parse(fs.readFileSync(path.join(__dirname, 'allStocks.json'), 'utf-8'));
 

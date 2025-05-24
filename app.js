@@ -8,12 +8,10 @@ app.use(express.json());
 connectDB();
 
 const marketPriceRoutes = require('./routes/marketPrices');
-const investmentHistoryRoutes = require('./routes/investmentHistory');
 const investmentRoutes = require('./routes/investments');
 const categoryRoutes = require('./routes/categories');
 
 app.use('/api/marketprices', marketPriceRoutes);
-app.use('/api/investmenthistory', investmentHistoryRoutes);
 app.use('/api/investments', investmentRoutes);
 app.use('/api/categories', categoryRoutes );
 
