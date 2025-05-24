@@ -6,7 +6,12 @@ const fs = require("fs");
 const path = require("path");
 const allStocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../allStocks.json'), 'utf-8'));
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function fetchCryptoPrice(symbol) {
+    await delay(3000);
     const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price`, {
         params: {
             ids: symbol.toLowerCase(),
@@ -17,7 +22,7 @@ async function fetchCryptoPrice(symbol) {
 }
 
 async function fetchCryptoHistoricalPrice(symbol, date) {
-    await delay(1200);
+    await delay(3000);
     const formatted = format(date, 'dd-MM-yyyy'); // CoinGecko expects dd-mm-yyyy
     try {
         const res = await axios.get(`https://api.coingecko.com/api/v3/coins/${symbol.toLowerCase()}/history`, {
@@ -49,3 +54,9 @@ function getSymbolByName(name) {
 
     return stock.display;
 }
+module.exports = {
+    fetchCryptoPrice,
+    fetchCryptoHistoricalPrice,
+    getSymbolByName,
+    normalizeName
+};

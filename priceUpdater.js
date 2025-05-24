@@ -3,10 +3,6 @@ const MarketPrice = require('./models/marketPrice');
 const Investment = require('./models/investment');
 const { fetchCryptoPrice,getSymbolByName } = require('./utils/coinGeckoandyahoo');
 
-
-
-
-/** Aktualizace ceny akcie z Yahoo Finance */
 async function fetchStockPrice(assetName) {
     try {
         const symbol = getSymbolByName(assetName);

@@ -1,8 +1,8 @@
 const Investment = require('../models/Investment');
 const yahooFinance = require('yahoo-finance2').default;
+const MarketPrice = require('../models/MarketPrice');
 const { endOfMonth, endOfYear, subDays, subMonths, subYears } = require('date-fns');
-const { fetchCryptoPrice, fetchCryptoHistoricalPrice } = require('../utils/coinGeckoandyahoo');
-
+const { fetchCryptoHistoricalPrice, getSymbolByName } = require('../utils/coinGeckoandyahoo');
 
 exports.getPortfolioChange = async (req, res) => {
     try {
@@ -15,13 +15,11 @@ exports.getPortfolioChange = async (req, res) => {
         } else if (period === '1W') {
             const day = now.getDay();
             const daysSinceFriday = (day >= 5) ? day - 5 : 7 + day - 5;
-            past = subDays(now, daysSinceFriday + 7); // poslední pátek před týdnem
+            past = subDays(now, daysSinceFriday + 7);
         } else if (period === '1M') {
-            const prevMonth = subMonths(now, 1);
-            past = endOfMonth(prevMonth);
+            past = endOfMonth(subMonths(now, 1));
         } else if (period === '1Y') {
-            const prevYear = subYears(now, 1);
-            past = endOfYear(prevYear);
+            past = endOfYear(subYears(now, 1));
         } else {
             return res.status(400).json({ error: 'Invalid period' });
         }
@@ -34,7 +32,6 @@ exports.getPortfolioChange = async (req, res) => {
 
         for (const inv of investments) {
             const isCrypto = inv.categoryId?.name?.toLowerCase().includes('crypto');
-            const symbol = isCrypto ? inv.assetName : getSymbolByName(inv.assetName);
             const isBond = inv.couponRate && inv.investmentLength;
 
             if (isBond) {
@@ -45,34 +42,35 @@ exports.getPortfolioChange = async (req, res) => {
                 totalBefore += principal;
                 continue;
             }
+
+            const assetName = inv.assetName;
+            const symbol = isCrypto ? assetName : getSymbolByName(assetName);
             if (!symbol) {
-                console.warn(`Symbol not found for ${inv.assetName}`);
+                console.warn(`Symbol not found for ${assetName}`);
                 continue;
             }
 
-            let nowPrice = null;
+            // ✅ Aktuální cena z MongoDB
+            const latestPriceDoc = await MarketPrice.findOne({ assetName }).sort({ date: -1 });
+            const nowPrice = latestPriceDoc?.price || null;
+
+            // 📉 Historická cena z API
             let oldPrice = null;
 
             if (isCrypto) {
-                nowPrice = await fetchCryptoPrice(symbol);
                 oldPrice = await fetchCryptoHistoricalPrice(symbol, past);
             } else {
-                const nowQuote = await yahooFinance.quote(symbol);
-                nowPrice = nowQuote?.regularMarketPrice || 0;
-
                 const pastTimestamp = Math.floor(past.getTime() / 1000);
                 const history = await yahooFinance.historical(symbol, {
                     period1: pastTimestamp - (5 * 86400),
                     period2: pastTimestamp + (2 * 86400),
                     interval: '1d'
                 });
-
                 const closest = history.find(h => new Date(h.date) <= past);
                 oldPrice = closest?.close || 0;
             }
-            // console.log(`Zpracovávám: ${inv.assetName}, ${inv.categoryId?.name}`);
-            // console.log(`Symbol: ${symbol}, isCrypto: ${isCrypto}`);
-            // console.log(`nowPrice: ${nowPrice}, oldPrice: ${oldPrice}`);
+
+            console.log(`Zpracovávám: ${assetName} | Now: ${nowPrice} | Old: ${oldPrice}`);
 
             if (nowPrice && oldPrice) {
                 totalNow += nowPrice * inv.amount;
