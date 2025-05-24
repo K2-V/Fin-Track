@@ -1,44 +1,10 @@
-const axios = require('axios');
 const yahooFinance = require('yahoo-finance2').default;
 const MarketPrice = require('./models/marketPrice');
 const Investment = require('./models/investment');
-const fs = require('fs');
-const path = require('path');
+const { fetchCryptoPrice,getSymbolByName } = require('./utils/coinGeckoandyahoo');
 
-const allStocks = JSON.parse(fs.readFileSync(path.join(__dirname, 'allStocks.json'), 'utf-8'));
 
-/** Aktualizace ceny kryptoměny z CoinGecko */
-async function fetchCryptoPrice(symbol) {
-    const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price`, {
-        params: {
-            ids: symbol.toLowerCase(),
-            vs_currencies: 'usd'
-        }
-    });
-    return res.data[symbol.toLowerCase()]?.usd || null;
-}
-function normalizeName(name) {
-    return name
-        .toLowerCase()
-        .replace(/(inc\.?|corporation|common stock|incorporated|company|corp\.?|co\.?|class [abc]|ads|ordinary shares|\(.*?\))/gi, '')
-        .replace(/\s+/g, ' ') // sjednotí mezery
-        .trim();
-}
 
-function getSymbolByName(name) {
-    const target = normalizeName(name);
-    const stock = allStocks.find(item => normalizeName(item.name) === target);
-
-    // fallback: když není přesná shoda, zkus najít první částečně odpovídající název
-    if (!stock) {
-        const partial = allStocks.find(item =>
-            normalizeName(item.name).includes(target)
-        );
-        return partial?.display || null;
-    }
-
-    return stock.display;
-}
 
 /** Aktualizace ceny akcie z Yahoo Finance */
 async function fetchStockPrice(assetName) {

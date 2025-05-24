@@ -1,58 +1,8 @@
 const Investment = require('../models/Investment');
 const yahooFinance = require('yahoo-finance2').default;
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
 const { endOfMonth, endOfYear, subDays, subMonths, subYears } = require('date-fns');
-const allStocks = JSON.parse(fs.readFileSync(path.join(__dirname, '../allStocks.json'), 'utf-8'));
-const { format } = require('date-fns');
-function normalizeName(name) {
-    return name
-        .toLowerCase()
-        .replace(/(inc\.?|corporation|common stock|incorporated|company|corp\.?|co\.?|class [abc]|ads|ordinary shares|\(.*?\))/gi, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-}
+const { fetchCryptoPrice, fetchCryptoHistoricalPrice } = require('../utils/coinGeckoandyahoo');
 
-function getSymbolByName(name) {
-    const target = normalizeName(name);
-    const stock = allStocks.find(item => normalizeName(item.name) === target);
-
-    if (!stock) {
-        const partial = allStocks.find(item => normalizeName(item.name).includes(target));
-        return partial?.display || null;
-    }
-
-    return stock.display;
-}
-
-async function fetchCryptoPrice(symbol) {
-    const res = await axios.get(`https://api.coingecko.com/api/v3/simple/price`, {
-        params: {
-            ids: symbol.toLowerCase(),
-            vs_currencies: 'usd'
-        }
-    });
-    return res.data[symbol.toLowerCase()]?.usd || null;
-}
-
-
-
-
-/** Získání historické ceny kryptoměny k určitému datu */
-async function fetchCryptoHistoricalPrice(symbol, date) {
-    const formatted = format(date, 'dd-MM-yyyy'); // CoinGecko expects dd-mm-yyyy
-    try {
-        const res = await axios.get(`https://api.coingecko.com/api/v3/coins/${symbol.toLowerCase()}/history`, {
-            params: { date: formatted }
-        });
-
-        return res.data?.market_data?.current_price?.usd || null;
-    } catch (err) {
-        console.warn(`Chyba při načítání historické ceny pro ${symbol} k datu ${formatted}: ${err.message}`);
-        return null;
-    }
-}
 
 exports.getPortfolioChange = async (req, res) => {
     try {
@@ -85,7 +35,16 @@ exports.getPortfolioChange = async (req, res) => {
         for (const inv of investments) {
             const isCrypto = inv.categoryId?.name?.toLowerCase().includes('crypto');
             const symbol = isCrypto ? inv.assetName : getSymbolByName(inv.assetName);
+            const isBond = inv.couponRate && inv.investmentLength;
 
+            if (isBond) {
+                const principal = inv.initialPrice * inv.amount;
+                const yearsHeld = (now - new Date(inv.purchaseDate)) / (1000 * 60 * 60 * 24 * 365.25);
+                const profit = principal * (inv.couponRate / 100) * yearsHeld;
+                totalNow += principal + profit;
+                totalBefore += principal;
+                continue;
+            }
             if (!symbol) {
                 console.warn(`Symbol not found for ${inv.assetName}`);
                 continue;
@@ -111,9 +70,9 @@ exports.getPortfolioChange = async (req, res) => {
                 const closest = history.find(h => new Date(h.date) <= past);
                 oldPrice = closest?.close || 0;
             }
-            console.log(`Zpracovávám: ${inv.assetName}, ${inv.categoryId?.name}`);
-            console.log(`Symbol: ${symbol}, isCrypto: ${isCrypto}`);
-            console.log(`nowPrice: ${nowPrice}, oldPrice: ${oldPrice}`);
+            // console.log(`Zpracovávám: ${inv.assetName}, ${inv.categoryId?.name}`);
+            // console.log(`Symbol: ${symbol}, isCrypto: ${isCrypto}`);
+            // console.log(`nowPrice: ${nowPrice}, oldPrice: ${oldPrice}`);
 
             if (nowPrice && oldPrice) {
                 totalNow += nowPrice * inv.amount;
