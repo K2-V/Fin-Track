@@ -50,11 +50,9 @@ exports.getPortfolioChange = async (req, res) => {
                 continue;
             }
 
-            // ✅ Aktuální cena z MongoDB
             const latestPriceDoc = await MarketPrice.findOne({ assetName }).sort({ date: -1 });
             const nowPrice = latestPriceDoc?.price || null;
 
-            // 📉 Historická cena z API
             let oldPrice = null;
 
             if (isCrypto) {

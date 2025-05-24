@@ -25,7 +25,6 @@ async function fetchStockPrice(assetName) {
     }
 }
 
-/** Uložení ceny do databáze */
 async function savePrice(assetName, price) {
     const entry = new MarketPrice({
         assetName,
@@ -35,10 +34,8 @@ async function savePrice(assetName, price) {
     await entry.save();
 }
 
-/** Aktualizační funkce pro seznam aktiv */
 async function updatePrices() {
     try {
-        // 1. Získat investice s připojenou kategorií
         const investments = await Investment.find({}).populate('categoryId');
         // console.log(`Načteno ${investments.length} investic z databáze`);
 
@@ -49,7 +46,6 @@ async function updatePrices() {
             const categoryName = inv.categoryId?.name || 'Neznámá';
             let assetType;
 
-            // 2. Určit typ podle názvu kategorie
             if (categoryName.toLowerCase().includes('crypto')) {
                 assetType = 'crypto';
             } else if (categoryName.toLowerCase().includes('stock')) {
@@ -57,9 +53,7 @@ async function updatePrices() {
             } else {
                 assetType = 'unknown';
             }
-
             // console.log(`Aktivum: ${inv.assetName}, Typ: ${assetType}`);
-
             const key = `${inv.assetName}-${assetType}`;
             if (!seen.has(key) && assetType !== 'unknown') {
                 uniqueAssets.push({
@@ -71,7 +65,6 @@ async function updatePrices() {
             }
         }
 
-        // 3. Získání cen
         for (const asset of uniqueAssets) {
             let price = null;
 

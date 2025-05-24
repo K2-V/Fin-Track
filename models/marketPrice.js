@@ -6,6 +6,6 @@ const MarketPriceSchema = new mongoose.Schema({
     price: {type: Number, required: true,}
 });
 
-MarketPriceSchema.index({ assetName: 1, date: -1 }); // rychlé vyhledání poslední ceny
+MarketPriceSchema.index({ assetName: 1, date: -1 });
 
 module.exports = mongoose.models.MarketPrice || mongoose.model('MarketPrice', MarketPriceSchema);

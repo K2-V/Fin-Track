@@ -23,7 +23,7 @@ async function fetchCryptoPrice(symbol) {
 
 async function fetchCryptoHistoricalPrice(symbol, date) {
     await delay(3000);
-    const formatted = format(date, 'dd-MM-yyyy'); // CoinGecko expects dd-mm-yyyy
+    const formatted = format(date, 'dd-MM-yyyy');
     try {
         const res = await axios.get(`https://api.coingecko.com/api/v3/coins/${symbol.toLowerCase()}/history`, {
             params: { date: formatted }
@@ -58,5 +58,4 @@ module.exports = {
     fetchCryptoPrice,
     fetchCryptoHistoricalPrice,
     getSymbolByName,
-    normalizeName
 };

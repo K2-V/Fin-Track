@@ -63,22 +63,18 @@ exports.getOverview = async (req, res) => {
     }
 };
 
-// GET all investments
 exports.getAllInvestments = async (req, res) => {
     try {
         const investments = await Investment.find()
             .populate({
                 path: 'categoryId',
-                select: 'name -_id'  // vrací jen název, bez _id
+                select: 'name -_id'
             });
-
-        // Můžeme volitelně transformovat výstup: přejmenovat categoryId → categoryName
         const result = investments.map(inv => ({
             ...inv.toObject(),
             categoryName: inv.categoryId.name,
-            categoryId: undefined // nebo smaž úplně
+            categoryId: undefined
         }));
-
         res.json(result);
     } catch (err) {
         console.error(err);
@@ -86,19 +82,13 @@ exports.getAllInvestments = async (req, res) => {
     }
 };
 
-// POST new investment
-// POST new investment
 exports.createInvestment = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     try {
         const { categoryName, ...rest } = req.body;
-
-        // ✅ Normalizace názvu kategorie
         const normalizedCategoryName = normalizeCategoryName(categoryName);
-
-        // ✅ Najdi kategorii podle normalizovaného názvu
         const category = await Category.findOne({
             name: { $regex: `^${normalizedCategoryName}$`, $options: 'i' }
         });
@@ -106,13 +96,10 @@ exports.createInvestment = async (req, res) => {
         if (!category) {
             return res.status(400).json({ message: `Category '${normalizedCategoryName}' not found.` });
         }
-
-        // ✅ Vytvoř investici s categoryId
         const newItem = new Investment({
             ...rest,
             categoryId: category._id
         });
-
         const saved = await newItem.save();
         res.status(201).json(saved);
     } catch (err) {
@@ -121,16 +108,14 @@ exports.createInvestment = async (req, res) => {
     }
 };
 
-// PUT update investment
 exports.updateInvestment = async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
         const updated = await Investment.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(updated);
     };
 
-// DELETE investment
+
 exports.deleteInvestment = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
