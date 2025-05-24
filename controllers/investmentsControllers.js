@@ -2,6 +2,7 @@ const Investment = require('../models/Investment');
 const Category = require('../models/Category');
 const MarketPrice = require('../models/marketPrice');
 const pluralize = require('pluralize');
+const { validationResult } = require('express-validator');
 
 function normalizeCategoryName(name) {
     const singular = pluralize.singular(name.trim().toLowerCase());
