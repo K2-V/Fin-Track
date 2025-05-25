@@ -2,6 +2,7 @@ const express = require('express');
 const { body, param } = require('express-validator');
 const {
     getAllInvestments,
+    getInvestmentById,
     createInvestment,
     updateInvestment,
     deleteInvestment,
@@ -12,6 +13,9 @@ const router = express.Router();
 
 router.get('/overview', getOverview);
 router.get('/', getAllInvestments);
+router.get('/:id', [
+    param('id').isMongoId().withMessage('Valid investment ID required')
+], getInvestmentById);
 router.post('/', [
     body('assetName').notEmpty().withMessage('Asset name is required'),
     body('categoryName').notEmpty().withMessage('Category name is required'),

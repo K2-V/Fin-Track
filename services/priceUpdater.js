@@ -1,7 +1,7 @@
 const yahooFinance = require('yahoo-finance2').default;
-const MarketPrice = require('./models/marketPrice');
-const Investment = require('./models/investment');
-const { fetchCryptoPrice,getSymbolByName } = require('./utils/coinGeckoandyahoo');
+const MarketPrice = require('../models/marketPrice');
+const Investment = require('../models/investment');
+const { fetchCryptoPrice,getSymbolByName } = require('./coinGeckoandyahoo');
 
 async function fetchStockPrice(assetName) {
     try {

@@ -9,13 +9,17 @@ connectDB();
 const marketPriceRoutes = require('./routes/marketPrices');
 const investmentRoutes = require('./routes/investments');
 const categoryRoutes = require('./routes/categories');
+const getHistoricalPrices = require('./services/getHistoricalPrices');
 
 app.use('/api/marketprices', marketPriceRoutes);
 app.use('/api/investments', investmentRoutes);
 app.use('/api/categories', categoryRoutes );
 
-const updatePrices = require('./priceUpdater');
+const updatePrices = require('./services/priceUpdater');
 
+(async () => {
+    await getHistoricalPrices();
+})();
 setInterval(() => {
     // console.log(`Spouštím updatePrices() v ${new Date().toLocaleTimeString()}`);
     updatePrices();

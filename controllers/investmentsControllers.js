@@ -65,16 +65,73 @@ exports.getOverview = async (req, res) => {
 
 exports.getAllInvestments = async (req, res) => {
     try {
-        const investments = await Investment.find()
+        const { type, assetName } = req.query;
+
+        const query = {};
+
+        if (assetName) {
+            query.assetName = { $regex: assetName, $options: 'i' };
+        }
+
+        if (type) {
+            const normalizedType = normalizeCategoryName(type);  // např. "stocks" → "stock"
+
+            const matchingCategories = await Category.find({
+                name: { $regex: `^${normalizedType}$`, $options: 'i' }
+            });
+
+            if (matchingCategories.length > 0) {
+                const categoryIds = matchingCategories.map(cat => cat._id);
+                query.categoryId = { $in: categoryIds };
+            } else {
+                return res.status(400).json({ message: `No matching categories found for type: '${type}'` });
+            }
+        }
+
+        const investments = await Investment.find(query)
             .populate({
                 path: 'categoryId',
                 select: 'name -_id'
             });
+
+        if (investments.length === 0 && assetName) {
+            return res.status(404).json({ message: `Asset with name '${assetName}' not found.` });
+        }
+
         const result = investments.map(inv => ({
             ...inv.toObject(),
             categoryName: inv.categoryId.name,
             categoryId: undefined
         }));
+
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+exports.getInvestmentById = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    try {
+        const investment = await Investment.findById(req.params.id)
+            .populate({
+                path: 'categoryId',
+                select: 'name -_id'
+            });
+
+        if (!investment) {
+            return res.status(404).json({ message: 'Investment not found' });
+        }
+
+        const result = {
+            ...investment.toObject(),
+            categoryName: investment.categoryId.name,
+            categoryId: undefined
+        };
+
         res.json(result);
     } catch (err) {
         console.error(err);
