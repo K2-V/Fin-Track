@@ -53,7 +53,7 @@ async function updatePrices() {
             } else {
                 assetType = 'unknown';
             }
-            // console.log(`Aktivum: ${inv.assetName}, Typ: ${assetType}`);
+            console.log(`Aktivum: ${inv.assetName}, Typ: ${assetType}`);
             const key = `${inv.assetName}-${assetType}`;
             if (!seen.has(key) && assetType !== 'unknown') {
                 uniqueAssets.push({

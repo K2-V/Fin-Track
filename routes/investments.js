@@ -6,13 +6,15 @@ const {
     createInvestment,
     updateInvestment,
     deleteInvestment,
-    getOverview
+    getOverview,
+    getMergedInvestmentsByCategory
 } = require('../controllers/investmentsControllers');
 
 const router = express.Router();
 
 router.get('/overview', getOverview);
 router.get('/', getAllInvestments);
+router.get('/merged', getMergedInvestmentsByCategory);
 router.get('/:id', [
     param('id').isMongoId().withMessage('Valid investment ID required')
 ], getInvestmentById);

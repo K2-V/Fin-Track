@@ -5,7 +5,7 @@ const historicalMarketPriceSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     period: {
         type: String,
-        enum: ['1D', '1W', '1M', '1Y'],
+        enum: ['1D', '1W', '1M', '1Y', 'CURRENT_MONTH'],
         required: true
     },
     date: { type: Date, required: true },
