@@ -1,25 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InvestmentTable from './InvestmentTable';
 
-const categories = ['Stocks', 'Crypto', 'Bonds'];
+const InvestmentTabs = ({ onRefresh, reloadKey }) => {
+    const [active, setActive] = useState('stock');
+    const [loading, setLoading] = useState(true);
 
-const InvestmentTabs = () => {
-    const [active, setActive] = useState('Stocks');
+    const tabs = ['stock', 'crypto', 'bond'];
+
+    useEffect(() => {
+        setLoading(true);
+        const timeout = setTimeout(() => setLoading(false), 400); // stejné chování jako Dashboard
+        return () => clearTimeout(timeout);
+    }, [active, reloadKey]);
 
     return (
-        <div className="bg-white p-4 rounded-2xl shadow mb-6">
-            <div className="flex justify-around mb-4">
-                {categories.map(cat => (
+        <div>
+            <div className="flex justify-around border-b mb-4">
+                {tabs.map(tab => (
                     <button
-                        key={cat}
-                        onClick={() => setActive(cat)}
-                        className={`font-semibold ${active === cat ? 'text-blue-800' : 'text-gray-400'}`}
+                        key={tab}
+                        onClick={() => setActive(tab)}
+                        className={`py-2 px-4 font-medium ${
+                            active === tab
+                                ? 'border-b-2 border-blue-600 text-blue-600'
+                                : 'text-gray-500'
+                        }`}
                     >
-                        {cat}
+                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </button>
                 ))}
             </div>
-            <InvestmentTable category={active} />
+
+            <div key={reloadKey}>
+                {loading ? (
+                    <div className="flex justify-center items-center h-40 animate-fadeIn">
+                        <div className="animate-spin h-6 w-6 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+                    </div>
+                ) : (
+                    <InvestmentTable category={active} onRefresh={onRefresh} />
+                )}
+            </div>
         </div>
     );
 };

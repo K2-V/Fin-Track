@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PortfolioStats from './PortfolioStats';
 import PortfolioChart from './PortfolioChart';
 import InvestmentTabs from './InvestmentTabs';
@@ -8,11 +8,18 @@ import NewInvestmentModal from './NewInvestmentModal';
 const Dashboard = () => {
     const [showModal, setShowModal] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setReloadKey(prev => prev + 1); // vynucení přenačtení
+        setReloadKey(prev => prev + 1);
+        setLoading(true);
     };
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setLoading(false), 500);
+        return () => clearTimeout(timeout);
+    }, [reloadKey]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -24,20 +31,41 @@ const Dashboard = () => {
                 </div>
             </header>
 
-            {/* Hlavní obsah */}
+            {/* Hlavní layout */}
             <div className="px-6 lg:flex gap-6">
-                {/* Levá část – stats + graf */}
+                {/* Levá část */}
                 <div className="lg:w-7/12 space-y-6">
-                    <PortfolioStats key={reloadKey} />
-                    <div className=" h-[480px] bg-white rounded-2xl shadow p-4 h-[420px]">
-                        <PortfolioChart key={reloadKey} />
+                    <div className="bg-white rounded-2xl shadow p-4 min-h-[120px]">
+                        {loading ? (
+                            <div className="flex justify-center items-center h-20 animate-fadeIn">
+                                <div className="animate-spin h-6 w-6 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+                            </div>
+                        ) : (
+                            <PortfolioStats key={reloadKey} />
+                        )}
+                    </div>
+
+                    <div className="h-[430px] bg-white rounded-2xl shadow p-4">
+                        {loading ? (
+                            <div className="flex justify-center items-center h-full animate-fadeIn">
+                                <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+                            </div>
+                        ) : (
+                            <PortfolioChart key={reloadKey} />
+                        )}
                     </div>
                 </div>
 
-                {/* Pravá část – tabs */}
+                {/* Pravá část */}
                 <div className="lg:w-5/12">
                     <div className="h-[600px] bg-white rounded-2xl shadow p-4 overflow-y-auto">
-                        <InvestmentTabs key={reloadKey} />
+                        {loading ? (
+                            <div className="flex justify-center items-center h-full animate-fadeIn">
+                                <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+                            </div>
+                        ) : (
+                            <InvestmentTabs key={reloadKey} />
+                        )}
                     </div>
                 </div>
             </div>

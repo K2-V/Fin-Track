@@ -48,11 +48,14 @@ exports.getMergedInvestmentsByCategory = async (req, res) => {
             if (isBond) {
                 const now = new Date();
                 const purchaseDate = new Date(inv.purchaseDate);
-                const monthsHeld = Math.floor((now - purchaseDate) / (1000 * 60 * 60 * 24 * 30.44));
+                const monthsHeld = (now - purchaseDate) / (1000 * 60 * 60 * 24 * 30.44); // přesně jako ve druhé části
                 const yearsHeld = monthsHeld / 12;
-                const annualCoupon = initialTotal * (inv.couponRate / 100);
+
+                const principal = initialTotal; // sladění pojmenování proměnné
+                const annualCoupon = principal * (inv.couponRate / 100);
+
                 profit = annualCoupon * yearsHeld;
-                value = initialTotal + profit;
+                value = principal + profit;
             } else if (currentPrice) {
                 profit = value - initialTotal;
             }
@@ -160,13 +163,13 @@ exports.getAllInvestments = async (req, res) => {
             query.categoryId = { $in: categoryIds };
         }
 
-        const investments = await Investment.find(query);
+        const investments = await Investment.find(query).populate('categoryId');
 
         if (investments.length === 0 && assetName) {
             return res.status(404).json({ message: `Asset with name '${assetName}' not found.` });
         }
 
-        // Získat nejnovější ceny pro všechna aktiva
+        // Získat nejnovější ceny pro všechna aktiva kromě dluhopisů
         const latestPrices = await MarketPrice.aggregate([
             { $sort: { date: -1 } },
             { $group: { _id: '$assetName', price: { $first: '$price' } } }
@@ -174,15 +177,42 @@ exports.getAllInvestments = async (req, res) => {
 
         const priceMap = Object.fromEntries(latestPrices.map(p => [p._id, p.price]));
 
-        const result = investments.map(inv => {
-            const currentPrice = priceMap[inv.assetName] ?? null;
-            const change = currentPrice != null
-                ? (currentPrice - inv.initialPrice) * inv.amount
-                : null;
+        const now = new Date();
 
-            const changePct = (currentPrice != null && inv.initialPrice > 0)
-                ? ((currentPrice - inv.initialPrice) / inv.initialPrice) * 100
-                : null;
+        const result = investments.map(inv => {
+            const isBond = inv.categoryId?.name?.toLowerCase() === 'bond';
+
+            const initialTotal = inv.initialPrice * inv.amount;
+            let currentPrice = null;
+            let change = null;
+            let changePct = null;
+
+            if (isBond) {
+                const purchaseDate = new Date(inv.purchaseDate);
+                const monthsHeld = (now - purchaseDate) / (1000 * 60 * 60 * 24 * 30.44);
+                const yearsHeld = monthsHeld / 12;
+
+                const principal = initialTotal;
+                const annualCoupon = principal * (inv.couponRate / 100);
+                const profit = annualCoupon * yearsHeld;
+                const value = principal + profit;
+
+                currentPrice = +(value / inv.amount).toFixed(2);
+                change = +profit.toFixed(2);
+                changePct = +(profit / principal * 100).toFixed(2);
+            } else {
+                currentPrice = priceMap[inv.assetName] ?? null;
+
+                if (currentPrice != null) {
+                    change = (currentPrice - inv.initialPrice) * inv.amount;
+                    changePct = inv.initialPrice > 0
+                        ? ((currentPrice - inv.initialPrice) / inv.initialPrice) * 100
+                        : null;
+
+                    change = +change.toFixed(2);
+                    changePct = changePct != null ? +changePct.toFixed(2) : null;
+                }
+            }
 
             return {
                 _id: inv._id,
@@ -191,15 +221,21 @@ exports.getAllInvestments = async (req, res) => {
                 initialPrice: inv.initialPrice,
                 purchaseDate: inv.purchaseDate,
                 currentPrice,
-                change: change != null ? +change.toFixed(2) : null,
-                changePct: changePct != null ? +changePct.toFixed(2) : null
+                change,
+                changePct,
+                ...(isBond && { couponRate: inv.couponRate,
+                                purchaseDate: inv.purchaseDate,
+                                length: inv.investmentLength,}),
+                ...(!isBond && {
+                    currentValue: currentPrice != null ? +(currentPrice * inv.amount).toFixed(2) : null
+                })
             };
         });
 
         res.json(result);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error', error: err.message });
+    } catch (error) {
+        console.error('Error fetching investments:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
 

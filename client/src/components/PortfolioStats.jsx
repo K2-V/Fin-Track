@@ -6,9 +6,6 @@ const PortfolioStats = () => {
         monthlyGain: 0,
         totalProfit: 0
     });
-    const [highlighted, setHighlighted] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [gainHighlight, setGainHighlight] = useState(false);
     const [highlightColor, setHighlightColor] = useState('');
     const [highlightTotalColor, setHighlightTotalColor] = useState('');
     const previousMonthlyGain = useRef(0);
@@ -17,91 +14,71 @@ const PortfolioStats = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                setLoading(true);
                 const response = await fetch('/api/stats/portfolio');
                 const data = await response.json();
+
                 if (data.totalValue !== previousTotalValue.current) {
                     const direction = data.totalValue > previousTotalValue.current ? 'up' : 'down';
 
                     setHighlightTotalColor('');
-                    setTimeout(() => {
-                        setHighlightTotalColor(direction === 'up' ? 'bg-green-100' : 'bg-red-100');
-                    }, 10);
-                    setTimeout(() => {
-                        setHighlightTotalColor('');
-                    }, 510);
+                    requestAnimationFrame(() => {
+                        setHighlightTotalColor(direction === 'up' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)');
+                        setTimeout(() => setHighlightTotalColor(''), 600);
+                    });
 
                     previousTotalValue.current = data.totalValue;
                 }
 
-                // Detekce změny hodnoty monthlyGain
                 if (data.monthlyGain !== previousMonthlyGain.current) {
                     const direction = data.monthlyGain > previousMonthlyGain.current ? 'up' : 'down';
 
                     setHighlightColor('');
-                    setTimeout(() => {
-                        setHighlightColor(direction === 'up' ? 'bg-green-100' : 'bg-red-100');
-                    }, 10);
-                    setTimeout(() => {
-                        setHighlightColor('');
-                    }, 510);
+                    requestAnimationFrame(() => {
+                        setHighlightColor(direction === 'up' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)');
+                        setTimeout(() => setHighlightColor(''), 600);
+                    });
 
                     previousMonthlyGain.current = data.monthlyGain;
-
                 }
-
 
                 setStats(data);
             } catch (error) {
                 console.error('Chyba při načítání statistik portfolia:', error);
-            } finally {
-                setLoading(false);
             }
         };
 
-
-        // Poprvé hned po načtení komponenty
         fetchStats();
-
-        // Pak každých 10 sekund (10000 ms)
         const interval = setInterval(fetchStats, 10000);
-
-        // Vyčisti interval při odchodu z komponenty
         return () => clearInterval(interval);
     }, []);
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div
-                className={`bg-white p-4 rounded-2xl shadow text-center transition-colors duration-300 ${highlightTotalColor}`}
+                style={{ backgroundColor: highlightTotalColor }}
+                className="bg-white p-4 rounded-2xl shadow text-center transition-colors duration-500"
             >
                 <h2 className="text-gray-500">Total Portfolio</h2>
                 <p className="text-2xl font-bold text-blue-800">
-                    {stats.totalValue.toLocaleString('cs-CZ')} $
+                    {stats.totalValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} $
                 </p>
             </div>
             <div
-                className={`bg-white p-4 rounded-2xl shadow text-center transition-colors duration-300 ${highlightColor}`}
+                style={{ backgroundColor: highlightColor }}
+                className="bg-white p-4 rounded-2xl shadow text-center transition-colors duration-500"
             >
                 <h2 className="text-gray-500">Gain of month</h2>
-                <p
-                    className={`text-2xl font-bold ${
-                        stats.monthlyGain >= 0 ? 'text-green-600' : 'text-red-500'
-                    }`}
-                >
+                <p className={`text-2xl font-bold ${stats.monthlyGain >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                     {stats.monthlyGain >= 0 ? '+' : ''}
                     {stats.monthlyGain.toFixed(2)} %
                 </p>
             </div>
             <div
-                className={`bg-white p-4 rounded-2xl shadow text-center transition-colors duration-300 ${highlightColor}`}
+                style={{ backgroundColor: highlightColor }}
+                className="bg-white p-4 rounded-2xl shadow text-center transition-colors duration-500"
             >
-                <h2 className="text-gray-500">Total Prosit</h2>
-                <p
-                    className={`text-2xl font-bold ${
-                        stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-500'
-                    }`}
-                >
+                <h2 className="text-gray-500">Total Profit</h2>
+                <p className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                     {stats.totalProfit >= 0 ? '+' : ''}
                     {stats.totalProfit.toFixed(2)} %
                 </p>
@@ -111,3 +88,4 @@ const PortfolioStats = () => {
 };
 
 export default PortfolioStats;
+

@@ -36,13 +36,13 @@ const NewInvestmentModal = ({ onClose }) => {
         };
 
         if (category === 'bond') {
-            payload.initialPrice = 1; // 💡 vždy nastavíme na 1
+            payload.initialPrice = 1;
         } else {
             delete payload.couponRate;
             delete payload.investmentLength;}
         try {
             await axios.post('/api/investments', payload);
-            alert('Investice byla úspěšně uložena');
+            alert('Invest was saved successfully.');
             onClose();
         } catch (error) {
             console.error('Chyba při ukládání investice:', error);

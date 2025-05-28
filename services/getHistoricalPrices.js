@@ -26,7 +26,6 @@ async function fetchAndStoreHistoricalPrices() {
         if (seen.has(key)) continue;
         seen.add(key);
 
-        // ⛔ Přeskoč dluhopisy
         const isBond = inv.couponRate && inv.investmentLength;
         if (isBond) {
             // console.log(`Přeskočeno (dluhopis): ${assetName}`);

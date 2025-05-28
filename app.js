@@ -36,7 +36,7 @@ const updatePrices = require('./services/priceUpdater');
 setInterval(() => {
     // console.log(`Spouštím updatePrices() v ${new Date().toLocaleTimeString()}`);
     updatePrices();
-}, 1000 * 40);
+}, 1000 * 60);
 
 
 

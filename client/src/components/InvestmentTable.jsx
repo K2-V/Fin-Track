@@ -25,7 +25,7 @@ const InvestmentTable = ({ category }) => {
         setSelectedAsset(assetName);
     };
 
-    if (loading) return <p className="text-center">Načítání…</p>;
+    if (loading) return <p className="text-center"></p>;
     if (data.length === 0) return <p className="text-center text-gray-400">Žádná data</p>;
 
     return (
