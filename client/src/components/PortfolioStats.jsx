@@ -14,7 +14,7 @@ const PortfolioStats = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch('/api/stats/portfolio');
+                const response = await fetch('/api/portfolio/stats');
                 const data = await response.json();
 
                 if (data.totalValue !== previousTotalValue.current) {

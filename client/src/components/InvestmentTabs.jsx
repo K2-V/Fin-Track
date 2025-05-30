@@ -9,7 +9,7 @@ const InvestmentTabs = ({ onRefresh, reloadKey }) => {
 
     useEffect(() => {
         setLoading(true);
-        const timeout = setTimeout(() => setLoading(false), 400); // stejné chování jako Dashboard
+        const timeout = setTimeout(() => setLoading(false), 200);
         return () => clearTimeout(timeout);
     }, [active, reloadKey]);
 

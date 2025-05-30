@@ -11,12 +11,13 @@ const marketPriceRoutes = require('./routes/marketPrices');
 const investmentRoutes = require('./routes/investments');
 const categoryRoutes = require('./routes/categories');
 const getHistoricalPrices = require('./services/getHistoricalPrices');
-const statsRoutes = require('./routes/stats');
+const portfolioRoutes = require('./routes/portfolioHistory');
 
-app.use('/api/stats', statsRoutes);
+
 app.use('/api/marketprices', marketPriceRoutes);
 app.use('/api/investments', investmentRoutes);
 app.use('/api/categories', categoryRoutes );
+app.use('/api/portfolio', portfolioRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hello World!')

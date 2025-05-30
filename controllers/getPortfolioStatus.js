@@ -2,6 +2,7 @@ const Investment = require('../models/Investment');
 const MarketPrice = require('../models/MarketPrice');
 const HistoricalMarketPrice = require('../models/HistoricalMarketPrice');
 const { startOfMonth } = require('date-fns');
+const PortfolioHistory = require('../models/portfolioHistory');
 
 exports.getPortfolioStats = async (req, res) => {
     try {
@@ -59,10 +60,21 @@ exports.getPortfolioStats = async (req, res) => {
         }
 
         const monthlyGain = ((totalNow - totalStartOfMonth) / totalStartOfMonth) * 100;
-        const totalProfit = (totalNow - totalCost)/totalCost*100;
+        const totalProfit = (totalNow - totalCost) / totalCost * 100;
 
+        const roundedTotalValue = +totalNow.toFixed(2);
+        const lastEntry = await PortfolioHistory.findOne().sort({ date: -1 });
+        // console.log('Aktuální totalValue:', roundedTotalValue);
+        // console.log('Poslední záznam:', lastEntry?.totalValue);
+        if (!lastEntry || Math.abs(lastEntry.totalValue - roundedTotalValue) >= 0.01) {
+            try {
+                await PortfolioHistory.create({ totalValue: roundedTotalValue });
+            } catch (err) {
+                console.error("Chyba při ukládání do MongoDB:", err);
+            }
+        }
         res.json({
-            totalValue: +totalNow.toFixed(2),
+            totalValue: roundedTotalValue,
             monthlyGain: +monthlyGain.toFixed(2),
             totalProfit: +totalProfit.toFixed(2)
         });
@@ -70,5 +82,14 @@ exports.getPortfolioStats = async (req, res) => {
         console.error(err);
         res.status(500).json({ error: 'Chyba při výpočtu portfolia' });
     }
+};
 
+exports.getPortfolioHistory = async (req, res) => {
+    try {
+        const history = await PortfolioHistory.find({}).sort({ date: 1 });
+        res.json(history);
+    } catch (err) {
+        console.error('Chyba při načítání historie portfolia:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
 };

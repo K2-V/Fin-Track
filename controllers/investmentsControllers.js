@@ -85,60 +85,6 @@ exports.getMergedInvestmentsByCategory = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
-exports.getOverview = async (req, res) => {
-    try {
-        const investments = await Investment.find({});
-
-        const latestPrices = await MarketPrice.aggregate([
-            { $sort: { date: -1 } },
-            { $group: { _id: '$assetName', price: { $first: '$price' } } }
-        ]);
-
-        const priceMap = Object.fromEntries(latestPrices.map(p => [p._id, p.price]));
-
-        const overview = investments.map(inv => {
-            const initialTotal = inv.initialPrice * inv.amount;
-            const isBond = inv.couponRate && inv.investmentLength;
-
-            let currentPrice = priceMap[inv.assetName] || null;
-            let value = currentPrice ? currentPrice * inv.amount : null;
-            let profit = null;
-            let profitPct = null;
-
-            if (isBond) {
-                const now = new Date();
-                const purchaseDate = new Date(inv.purchaseDate);
-                const monthsHeld = Math.floor((now - purchaseDate) / (1000 * 60 * 60 * 24 * 30.44));
-                const yearsHeld = monthsHeld / 12;
-
-                const annualCoupon = (inv.initialPrice * inv.amount) * (inv.couponRate / 100);
-                profit = annualCoupon * yearsHeld;
-                profitPct = (profit / initialTotal) * 100;
-
-                value = initialTotal + profit;
-            } else if (currentPrice) {
-                profit = value - initialTotal;
-                profitPct = (profit / initialTotal) * 100;
-            }
-
-            return {
-                id: inv._id,
-                asset: inv.assetName,
-                amount: inv.amount,
-                initialPrice: inv.initialPrice,
-                currentPrice,
-                value: value !== null ? +value.toFixed(2) : null,
-                profit: profit !== null ? +profit.toFixed(2) : null,
-                profitPct: profitPct !== null ? +profitPct.toFixed(2) : null
-            };
-        });
-
-        res.json(overview);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Nepodařilo se načíst přehled investic' });
-    }
-};
 
 exports.getAllInvestments = async (req, res) => {
     try {

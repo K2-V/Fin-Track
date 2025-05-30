@@ -17,7 +17,7 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
-        const timeout = setTimeout(() => setLoading(false), 500);
+        const timeout = setTimeout(() => setLoading(false), 200);
         return () => clearTimeout(timeout);
     }, [reloadKey]);
 
@@ -32,7 +32,7 @@ const Dashboard = () => {
             </header>
 
             {/* Hlavní layout */}
-            <div className="px-6 lg:flex gap-6">
+            <div className="px-6 flex flex-col gap-6 lg:flex-row">
                 {/* Levá část */}
                 <div className="lg:w-7/12 space-y-6">
                     <div className="bg-white rounded-2xl shadow p-4 min-h-[120px]">
@@ -45,7 +45,7 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    <div className="h-[430px] bg-white rounded-2xl shadow p-4">
+                    <div className="bg-white rounded-2xl shadow p-4">
                         {loading ? (
                             <div className="flex justify-center items-center h-full animate-fadeIn">
                                 <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
@@ -58,7 +58,7 @@ const Dashboard = () => {
 
                 {/* Pravá část */}
                 <div className="lg:w-5/12">
-                    <div className="h-[600px] bg-white rounded-2xl shadow p-4 overflow-y-auto">
+                    <div className=" bg-white rounded-2xl shadow p-4 overflow-y-auto">
                         {loading ? (
                             <div className="flex justify-center items-center h-full animate-fadeIn">
                                 <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>

@@ -1,31 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import InvestmentDetail from './InvestmentDetail'; // cesta dle struktury
+import InvestmentDetail from './InvestmentDetail';
 
 const InvestmentTable = ({ category }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedAsset, setSelectedAsset] = useState(null);
+    const intervalRef = useRef(null);
+
+    const fetchFullData = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(`/api/investments/merged?type=${category.toLowerCase()}`);
+            setData(res.data);
+        } catch (err) {
+            console.error('Chyba při načítání investic:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchUpdatesOnly = async () => {
+        try {
+            const res = await axios.get(`/api/investments/merged?type=${category.toLowerCase()}`);
+            const newData = res.data;
+
+            setData(prevData =>
+                prevData.map(item => {
+                    const updated = newData.find(u => u.asset === item.asset);
+                    return updated
+                        ? {
+                            ...item,
+                            currentValue: updated.currentValue,
+                            profit: updated.profit,
+                            profitPct: updated.profitPct
+                        }
+                        : item;
+                })
+            );
+        } catch (err) {
+            console.error('Chyba při aktualizaci hodnot:', err);
+        }
+    };
 
     useEffect(() => {
-        setLoading(true);
-        axios
-            .get(`/api/investments/merged?type=${category.toLowerCase()}`)
-            .then(res => {
-                setData(res.data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Chyba při načítání investic:', err);
-                setLoading(false);
-            });
+        fetchFullData();
+
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(fetchUpdatesOnly, 30000); // 30 s
+
+        return () => clearInterval(intervalRef.current);
     }, [category]);
 
     const handleOpenDetail = (assetName) => {
         setSelectedAsset(assetName);
     };
 
-    if (loading) return <p className="text-center"></p>;
+    if (loading) return <p className="text-center">Načítání…</p>;
     if (data.length === 0) return <p className="text-center text-gray-400">Žádná data</p>;
 
     return (
@@ -45,7 +76,7 @@ const InvestmentTable = ({ category }) => {
                         <td className="py-2">{item.asset}</td>
                         <td className="py-2">
                             {item.currentValue != null
-                                ? item.currentValue.toLocaleString('cs-CZ') + '$'
+                                ? item.currentValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' $'
                                 : '—'}
                         </td>
                         <td
@@ -56,11 +87,11 @@ const InvestmentTable = ({ category }) => {
                             <div className="flex flex-col leading-tight">
                                     <span>
                                         {item.profit >= 0 ? '+' : ''}
-                                        {item.profit?.toLocaleString('cs-CZ')} $
+                                        {item.profit?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} $
                                     </span>
-                                    <span className="text-sm">
+                                <span className="text-sm">
                                         {item.profitPct >= 0 ? '+' : ''}
-                                    {item.profitPct?.toFixed(1)} %
+                                    {item.profitPct?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} %
                                     </span>
                             </div>
                         </td>
@@ -78,7 +109,10 @@ const InvestmentTable = ({ category }) => {
             </table>
 
             {selectedAsset && (
-                <InvestmentDetail asset={selectedAsset} onClose={() => setSelectedAsset(null)} />
+                <InvestmentDetail
+                    asset={selectedAsset}
+                    onClose={() => setSelectedAsset(null)}
+                />
             )}
         </>
     );

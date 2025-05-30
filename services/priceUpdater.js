@@ -3,10 +3,10 @@ const MarketPrice = require('../models/marketPrice');
 const Investment = require('../models/investment');
 const { fetchCryptoPrice, getSymbolByName } = require('./coinGeckoandyahoo');
 
-// ✅ Kontrola, zda je otevřená burza (NYSE: 13:30–20:00 UTC, po–pá)
+// Kontrola, zda je otevřená burza
 function isMarketOpen() {
     const now = new Date();
-    const weekday = now.getUTCDay(); // 0 = neděle, 6 = sobota
+    const weekday = now.getUTCDay();
     if (weekday === 0 || weekday === 6) return false;
 
     const hours = now.getUTCHours();
@@ -16,34 +16,32 @@ function isMarketOpen() {
     return currentMinutes >= (13 * 60 + 30) && currentMinutes <= (20 * 60);
 }
 
-// ✅ Získání ceny akcie z Yahoo Finance
 async function fetchStockPrice(assetName) {
     try {
         const symbol = getSymbolByName(assetName);
         if (!symbol) {
-            console.warn(`⚠️ Nenalezen symbol pro "${assetName}" v allStocks.json`);
+            console.warn(`Nenalezen symbol pro "${assetName}" v allStocks.json`);
             return null;
         }
 
         const quote = await yahooFinance.quote(symbol);
         if (!quote || typeof quote.regularMarketPrice === 'undefined') {
-            console.warn(`⚠️ Yahoo Finance nenašlo cenu pro symbol "${symbol}"`);
+            console.warn(`Yahoo Finance nenašlo cenu pro symbol "${symbol}"`);
             return null;
         }
 
         return quote.regularMarketPrice;
     } catch (err) {
-        console.error(`❌ Chyba při získávání ceny z Yahoo Finance pro "${assetName}":`, err.message);
+        console.error(`Chyba při získávání ceny z Yahoo Finance pro "${assetName}":`, err.message);
         return null;
     }
 }
 
-// ✅ Uložení ceny, pokud je jiná než předchozí
 async function savePrice(assetName, newPrice) {
     const lastEntry = await MarketPrice.findOne({ assetName }).sort({ date: -1 });
 
     if (lastEntry && lastEntry.price === newPrice) {
-        console.log(`⏩ ${assetName}: Cena se nezměnila (${newPrice}) – neukládám.`);
+        console.log(`${assetName}: Cena se nezměnila (${newPrice}) – neukládám.`);
         return;
     }
 
@@ -53,10 +51,9 @@ async function savePrice(assetName, newPrice) {
         date: new Date()
     });
     await entry.save();
-    console.log(`💾 Uložena nová cena pro ${assetName}: ${newPrice}`);
+    console.log(`Uložena nová cena pro ${assetName}: ${newPrice}`);
 }
 
-// ✅ Hlavní funkce
 async function updatePrices() {
     try {
         const investments = await Investment.find({}).populate('categoryId');
@@ -103,12 +100,12 @@ async function updatePrices() {
             if (price !== null) {
                 await savePrice(asset.name, price);
             } else {
-                console.warn(`⚠️ Cena nenalezena pro ${asset.name}`);
+                console.warn(`Cena nenalezena pro ${asset.name}`);
             }
         }
 
     } catch (err) {
-        console.error('❌ Chyba při aktualizaci cen:', err);
+        console.error('Chyba při aktualizaci cen:', err);
     }
 }
 
