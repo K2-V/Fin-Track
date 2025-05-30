@@ -30,7 +30,7 @@ exports.createCategory = async (req, res) => {
         const fullName = match.name;
         categoryName = fullName
             .replace(/[,.-]/g, '')
-            .replace(/\b(Inc|Incorporated|Corporation|Corp|Ltd|Limited|Company|Co)\b.*$/i, '')
+            .replace(/\b.*$/i, '')
             .trim();
     } else {
         categoryName = input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();

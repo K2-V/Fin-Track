@@ -1,0 +1,150 @@
+[
+  {
+    "name": "Algorand",
+    "display": "ALGO-USD"
+  },
+  {
+    "name": "Apecoin",
+    "display": "APE-USD"
+  },
+  {
+    "name": "Avalanche",
+    "display": "AVAX-USD"
+  },
+  {
+    "name": "Binance Coin",
+    "display": "BNB-USD"
+  },
+  {
+    "name": "Bitcoin",
+    "display": "BTC-USD"
+  },
+  {
+    "name": "Bitcoin Cash",
+    "display": "BCH-USD"
+  },
+  {
+    "name": "Cardano",
+    "display": "ADA-USD"
+  },
+  {
+    "name": "Chainlink",
+    "display": "LINK-USD"
+  },
+  {
+    "name": "Chiliz",
+    "display": "CHZ-USD"
+  },
+  {
+    "name": "Cosmos",
+    "display": "ATOM-USD"
+  },
+  {
+    "name": "Curve DAO Token",
+    "display": "CRV-USD"
+  },
+  {
+    "name": "Decentraland",
+    "display": "MANA-USD"
+  },
+  {
+    "name": "Dogecoin",
+    "display": "DOGE-USD"
+  },
+  {
+    "name": "DYDX",
+    "display": "DYDX-USD"
+  },
+  {
+    "name": "EOS",
+    "display": "EOS-USD"
+  },
+  {
+    "name": "Ethereum",
+    "display": "ETH-USD"
+  },
+  {
+    "name": "Filecoin",
+    "display": "FIL-USD"
+  },
+  {
+    "name": "Gala",
+    "display": "GALA-USD"
+  },
+  {
+    "name": "The Graph",
+    "display": "GRT-USD"
+  },
+  {
+    "name": "Kusama",
+    "display": "KSM-USD"
+  },
+  {
+    "name": "Litecoin",
+    "display": "LTC-USD"
+  },
+  {
+    "name": "Maker",
+    "display": "MKR-USD"
+  },
+  {
+    "name": "Monero",
+    "display": "XMR-USD"
+  },
+  {
+    "name": "Polkadot",
+    "display": "DOT-USD"
+  },
+  {
+    "name": "Polygon",
+    "display": "MATIC-USD"
+  },
+  {
+    "name": "Ripple",
+    "display": "XRP-USD"
+  },
+  {
+    "name": "Sandbox",
+    "display": "SAND-USD"
+  },
+  {
+    "name": "Shiba Inu",
+    "display": "SHIB-USD"
+  },
+  {
+    "name": "Solana",
+    "display": "SOL-USD"
+  },
+  {
+    "name": "Stellar",
+    "display": "XLM-USD"
+  },
+  {
+    "name": "Sushi",
+    "display": "SUSHI-USD"
+  },
+  {
+    "name": "Tezos",
+    "display": "XTZ-USD"
+  },
+  {
+    "name": "TRON",
+    "display": "TRX-USD"
+  },
+  {
+    "name": "Uniswap",
+    "display": "UNI-USD"
+  },
+  {
+    "name": "VeChain",
+    "display": "VET-USD"
+  },
+  {
+    "name": "Waves",
+    "display": "WAVES-USD"
+  },
+  {
+    "name": "Zcash",
+    "display": "ZEC-USD"
+  }
+]
