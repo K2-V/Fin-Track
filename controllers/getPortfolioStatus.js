@@ -63,12 +63,13 @@ exports.getPortfolioStats = async (req, res) => {
         const totalProfit = (totalNow - totalCost) / totalCost * 100;
 
         const roundedTotalValue = +totalNow.toFixed(2);
-        const lastEntry = await PortfolioHistory.findOne().sort({ date: -1 });
-        // console.log('Aktuální totalValue:', roundedTotalValue);
-        // console.log('Poslední záznam:', lastEntry?.totalValue);
-        if (!lastEntry || Math.abs(lastEntry.totalValue - roundedTotalValue) >= 0.01) {
+        const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+        const recentEntry = await PortfolioHistory.findOne({ date: { $gte: oneMinuteAgo } }).sort({ date: -1 });
+
+        if (!recentEntry || Math.abs(recentEntry.totalValue - roundedTotalValue) >= 0.01) {
             try {
                 await PortfolioHistory.create({ totalValue: roundedTotalValue });
+                console.log(`[${new Date().toISOString()}] Uložena nová hodnota: $${roundedTotalValue}`);
             } catch (err) {
                 console.error("Chyba při ukládání do MongoDB:", err);
             }

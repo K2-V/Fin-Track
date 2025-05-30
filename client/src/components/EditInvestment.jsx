@@ -66,19 +66,19 @@ const EditInvestmentModal = ({ investmentId, onClose, onSuccess }) => {
 
         try {
             await axios.put(`/api/investments/${investmentId}`, payload);
-            alert('Investice byla úspěšně upravena.');
+            alert('Investment was successfully updated.');
             if (onSuccess) onSuccess();
             onClose();
         } catch (err) {
-            console.error('Chyba při ukládání změn:', err);
-            alert('Nepodařilo se upravit investici.');
+            console.error('Error while saving changes:', err);
+            alert('Failed to update the investment.');
         }
     };
 
     if (loading) {
         return (
             <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-                <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg text-center">Načítání...</div>
+                <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg text-center"></div>
             </div>
         );
     }

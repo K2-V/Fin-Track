@@ -34,16 +34,13 @@ exports.getPortfolioChange = async (req, res) => {
 
             const assetName = inv.assetName;
 
-            // Načtení aktuální ceny (type: "live")
             const latest = await MarketPrice.findOne({ assetName }).sort({ date: -1 });
             const nowPrice = latest?.price;
-
-            // Načtení historické ceny z vlastní databáze
             const historical = await HistoricalMarketPrice.findOne({ assetName, period });
             const oldPrice = historical?.price;
 
             if (!nowPrice || !oldPrice) {
-                console.warn(`Chybějící cena pro ${assetName} – now: ${nowPrice}, old: ${oldPrice}`);
+                //console.warn(`Chybějící cena pro ${assetName} – now: ${nowPrice}, old: ${oldPrice}`);
                 continue;
             }
 
@@ -66,6 +63,6 @@ exports.getPortfolioChange = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Chyba při výpočtu zhodnocení portfolia' });
+        res.status(500).json({ error: 'Error while calculating portfolio performance' });
     }
 };

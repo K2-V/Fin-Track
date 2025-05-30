@@ -21,15 +21,15 @@ const PortfolioChart = () => {
             const data = await res.json();
             setHistory(data);
         } catch (err) {
-            console.error('Chyba při načítání historie portfolia:', err);
+            console.error('Error while loading portfolio history:', err);
         }
     };
 
     useEffect(() => {
-        fetchHistory(); // první načtení
-        intervalRef.current = setInterval(fetchHistory, 30000); // každých 30 sekund
+        fetchHistory();
+        intervalRef.current = setInterval(fetchHistory, 30000);
 
-        return () => clearInterval(intervalRef.current); // vyčištění při unmountu
+        return () => clearInterval(intervalRef.current);
     }, []);
 
     const groupBy = (arr, keyFn) => {

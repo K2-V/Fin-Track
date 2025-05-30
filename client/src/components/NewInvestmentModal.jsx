@@ -42,11 +42,11 @@ const NewInvestmentModal = ({ onClose }) => {
             delete payload.investmentLength;}
         try {
             await axios.post('/api/investments', payload);
-            alert('Invest was saved successfully.');
+            alert('Investment was saved successfully.');
             onClose();
         } catch (error) {
-            console.error('Chyba při ukládání investice:', error);
-            alert('Nepodařilo se uložit investici');
+            console.error('Error while saving the investment:', error);
+            alert('Failed to save the investment.');
         }
     };
 
@@ -68,8 +68,6 @@ const NewInvestmentModal = ({ onClose }) => {
                     <option value="crypto">Crypto</option>
                     <option value="bond">Bonds</option>
                 </select>
-
-                {/* Non-bond fields */}
                 {!isBond && (
                     <>
                         <label className="block text-sm font-medium">Investment Name</label>
@@ -101,8 +99,6 @@ const NewInvestmentModal = ({ onClose }) => {
                         />
                     </>
                 )}
-
-                {/* Bond-only fields */}
                 {isBond && (
                     <>
                         <label className="block text-sm font-medium">Bond Name</label>

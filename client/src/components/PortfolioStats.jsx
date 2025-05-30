@@ -43,7 +43,7 @@ const PortfolioStats = () => {
 
                 setStats(data);
             } catch (error) {
-                console.error('Chyba při načítání statistik portfolia:', error);
+                console.error('Error while loading portfolio statistics:', error);
             }
         };
 

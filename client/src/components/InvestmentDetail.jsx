@@ -111,7 +111,7 @@ const InvestmentDetail = ({ asset, onClose, onRefresh }) => {
                 setCurrentValue(null);
                 setCurrentPrice(null);
             }
-            setLoading(false); // Přesunuto sem, aby se ukončila animace při prvním načtení
+            setLoading(false);
         } catch (err) {
             console.error('Chyba při načítání investic:', err);
             setLoading(false);

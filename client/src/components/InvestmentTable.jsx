@@ -14,7 +14,7 @@ const InvestmentTable = ({ category }) => {
             const res = await axios.get(`/api/investments/merged?type=${category.toLowerCase()}`);
             setData(res.data);
         } catch (err) {
-            console.error('Chyba při načítání investic:', err);
+            console.error('Error to load investments:', err);
         } finally {
             setLoading(false);
         }
@@ -39,7 +39,7 @@ const InvestmentTable = ({ category }) => {
                 })
             );
         } catch (err) {
-            console.error('Chyba při aktualizaci hodnot:', err);
+            console.error('Error while updating values:', err);
         }
     };
 
@@ -47,7 +47,7 @@ const InvestmentTable = ({ category }) => {
         fetchFullData();
 
         if (intervalRef.current) clearInterval(intervalRef.current);
-        intervalRef.current = setInterval(fetchUpdatesOnly, 30000); // 30 s
+        intervalRef.current = setInterval(fetchUpdatesOnly, 30000);
 
         return () => clearInterval(intervalRef.current);
     }, [category]);
@@ -56,8 +56,8 @@ const InvestmentTable = ({ category }) => {
         setSelectedAsset(assetName);
     };
 
-    if (loading) return <p className="text-center">Načítání…</p>;
-    if (data.length === 0) return <p className="text-center text-gray-400">Žádná data</p>;
+    if (loading) return <p className="text-center">Loading</p>;
+    if (data.length === 0) return <p className="text-center text-gray-400">No data</p>;
 
     return (
         <>
