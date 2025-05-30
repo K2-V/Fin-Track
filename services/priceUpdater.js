@@ -1,7 +1,20 @@
 const yahooFinance = require('yahoo-finance2').default;
 const MarketPrice = require('../models/marketPrice');
 const Investment = require('../models/investment');
-const { fetchCryptoPrice,getSymbolByName } = require('./coinGeckoandyahoo');
+const { fetchCryptoPrice, getSymbolByName } = require('./coinGeckoandyahoo');
+
+// Kontrola, zda je otevřená burza
+function isMarketOpen() {
+    const now = new Date();
+    const weekday = now.getUTCDay();
+    if (weekday === 0 || weekday === 6) return false;
+
+    const hours = now.getUTCHours();
+    const minutes = now.getUTCMinutes();
+    const currentMinutes = hours * 60 + minutes;
+
+    return currentMinutes >= (13 * 60 + 30) && currentMinutes <= (20 * 60);
+}
 
 async function fetchStockPrice(assetName) {
     try {
@@ -12,7 +25,6 @@ async function fetchStockPrice(assetName) {
         }
 
         const quote = await yahooFinance.quote(symbol);
-
         if (!quote || typeof quote.regularMarketPrice === 'undefined') {
             console.warn(`Yahoo Finance nenašlo cenu pro symbol "${symbol}"`);
             return null;
@@ -25,19 +37,26 @@ async function fetchStockPrice(assetName) {
     }
 }
 
-async function savePrice(assetName, price) {
+async function savePrice(assetName, newPrice) {
+    const lastEntry = await MarketPrice.findOne({ assetName }).sort({ date: -1 });
+
+    if (lastEntry && lastEntry.price === newPrice) {
+        console.log(`${assetName}: Cena se nezměnila (${newPrice}) – neukládám.`);
+        return;
+    }
+
     const entry = new MarketPrice({
         assetName,
-        price,
+        price: newPrice,
         date: new Date()
     });
     await entry.save();
+    console.log(`Uložena nová cena pro ${assetName}: ${newPrice}`);
 }
 
 async function updatePrices() {
     try {
         const investments = await Investment.find({}).populate('categoryId');
-        // console.log(`Načteno ${investments.length} investic z databáze`);
 
         const uniqueAssets = [];
         const seen = new Set();
@@ -53,19 +72,23 @@ async function updatePrices() {
             } else {
                 assetType = 'unknown';
             }
-            // console.log(`Aktivum: ${inv.assetName}, Typ: ${assetType}`);
+
             const key = `${inv.assetName}-${assetType}`;
             if (!seen.has(key) && assetType !== 'unknown') {
                 uniqueAssets.push({
                     name: inv.assetName,
-                    type: assetType,
-                    display: inv.assetName
+                    type: assetType
                 });
                 seen.add(key);
             }
         }
 
         for (const asset of uniqueAssets) {
+            if (asset.type === 'stock' && !isMarketOpen()) {
+                console.log(`⏸ ${asset.name}: Burza zavřená – přeskočeno.`);
+                continue;
+            }
+
             let price = null;
 
             if (asset.type === 'crypto') {
@@ -76,9 +99,8 @@ async function updatePrices() {
 
             if (price !== null) {
                 await savePrice(asset.name, price);
-                // console.log(`Uložena cena pro ${asset.name}: ${price}`);
             } else {
-                // console.warn(`Cena nenalezena pro ${asset.name}`);
+                console.warn(`Cena nenalezena pro ${asset.name}`);
             }
         }
 
@@ -86,4 +108,5 @@ async function updatePrices() {
         console.error('Chyba při aktualizaci cen:', err);
     }
 }
+
 module.exports = updatePrices;

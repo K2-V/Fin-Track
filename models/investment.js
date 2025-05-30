@@ -6,8 +6,6 @@ const InvestmentSchema = new mongoose.Schema({
     amount: {type: Number, required: true,},
     initialPrice: {type: Number, required: true,},
     purchaseDate: {type: Date, required: true,},
-    note: {type: String,},
-    // Jen pro dluhopisy
     couponRate: {type: Number,},
     investmentLength: {type: Number, /* v měsících*/ }
 });

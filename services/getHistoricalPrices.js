@@ -1,4 +1,4 @@
-const { subDays, subMonths, subYears } = require('date-fns');
+const { subDays, subMonths, subYears, startOfMonth } = require('date-fns');
 const HistoricalMarketPrice = require('../models/HistoricalMarketPrice');
 const Investment = require('../models/Investment');
 const { fetchCryptoHistoricalPrice, getSymbolByName } = require('../services/coinGeckoandyahoo');
@@ -8,12 +8,14 @@ const PERIODS = [
     { label: '1D', date: subDays(new Date(), 1) },
     { label: '1W', date: subDays(new Date(), 7) },
     { label: '1M', date: subMonths(new Date(), 1) },
-    { label: '1Y', date: subYears(new Date(), 1) }
+    { label: '1Y', date: subYears(new Date(), 1) },
+    { label: 'CURRENT_MONTH', date: startOfMonth(new Date()) }
 ];
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 async function fetchAndStoreHistoricalPrices() {
     const investments = await Investment.find().populate('categoryId');
     const seen = new Set();
@@ -23,6 +25,12 @@ async function fetchAndStoreHistoricalPrices() {
         const key = assetName.toLowerCase();
         if (seen.has(key)) continue;
         seen.add(key);
+
+        const isBond = inv.couponRate && inv.investmentLength;
+        if (isBond) {
+            // console.log(`Přeskočeno (dluhopis): ${assetName}`);
+            continue;
+        }
 
         const isCrypto = inv.categoryId?.name?.toLowerCase().includes('crypto');
         const symbol = isCrypto ? assetName : getSymbolByName(assetName);
@@ -58,7 +66,7 @@ async function fetchAndStoreHistoricalPrices() {
                         period: label,
                         date
                     });
-                    console.log(`Uložena historická cena pro ${assetName} [${label}] = ${price}`);
+                    // console.log(`Uložena historická cena pro ${assetName} [${label}] = ${price}`);
                 }
             } catch (err) {
                 console.warn(`Chyba při ukládání ceny ${assetName} [${label}]: ${err.message}`);
